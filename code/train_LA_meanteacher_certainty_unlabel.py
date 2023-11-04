@@ -113,7 +113,7 @@ if __name__ == "__main__":
                        ]))
 
     labeled_idxs = list(range(16))
-    unlabeled_idxs = list(range(16, 80))
+    unlabeled_idxs = list(range(16, 96))
 
 
     batch_sampler = TwoStreamBatchSampler(labeled_idxs, unlabeled_idxs, batch_size, batch_size-labeled_bs)
