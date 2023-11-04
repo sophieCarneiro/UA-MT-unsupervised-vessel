@@ -8,6 +8,7 @@ import logging
 import time
 import random
 import numpy as np
+import monai
 
 import torch
 import torch.optim as optim
@@ -17,7 +18,6 @@ import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
 
-from networks.vnet import VNet
 from dataloaders import utils
 from utils import ramps, losses
 from dataloaders.la_heart import LAHeart, RandomCrop, CenterCrop, RandomRotFlip, ToTensor, TwoStreamBatchSampler
@@ -57,8 +57,10 @@ if args.deterministic:
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
 
+
 num_classes = 2
-patch_size = (112, 112, 80)
+
+patch_size = (96, 96, 96)
 
 
 def get_current_consistency_weight(epoch):
@@ -86,7 +88,7 @@ if __name__ == "__main__":
 
     def create_model(ema=False):
         # Network definition
-        net = VNet(n_channels=1, n_classes=num_classes, normalization='batchnorm', has_dropout=True)
+        net =  monai.networks.nets.UNet(dimensions=3, in_channels=1, out_channels=1, channels=(16, 32, 64, 128), strides=(2, 2, 2),  num_res_units=2, norm=('batch'))
         model = net.cuda()
         if ema:
             for param in model.parameters():
@@ -109,8 +111,11 @@ if __name__ == "__main__":
                            CenterCrop(patch_size),
                            ToTensor()
                        ]))
+
     labeled_idxs = list(range(16))
     unlabeled_idxs = list(range(16, 80))
+
+
     batch_sampler = TwoStreamBatchSampler(labeled_idxs, unlabeled_idxs, batch_size, batch_size-labeled_bs)
     def worker_init_fn(worker_id):
         random.seed(args.seed+worker_id)
@@ -151,13 +156,13 @@ if __name__ == "__main__":
             T = 8
             volume_batch_r = unlabeled_volume_batch.repeat(2, 1, 1, 1, 1)
             stride = volume_batch_r.shape[0] // 2
-            preds = torch.zeros([stride * T, 2, 112, 112, 80]).cuda()
+            preds = torch.zeros([stride * T, 2, 96, 96, 96]).cuda()
             for i in range(T//2):
                 ema_inputs = volume_batch_r + torch.clamp(torch.randn_like(volume_batch_r) * 0.1, -0.2, 0.2)
                 with torch.no_grad():
                     preds[2 * stride * i:2 * stride * (i + 1)] = ema_model(ema_inputs)
             preds = F.softmax(preds, dim=1)
-            preds = preds.reshape(T, stride, 2, 112, 112, 80)
+            preds = preds.reshape(T, stride, 2, 96, 96, 96)
             preds = torch.mean(preds, dim=0)  #(batch, 2, 112,112,80)
             uncertainty = -1.0*torch.sum(preds*torch.log(preds + 1e-6), dim=1, keepdim=True) #(batch, 1, 112,112,80)
 
