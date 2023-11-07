@@ -9,7 +9,7 @@ import time
 import random
 import numpy as np
 import monai
-
+from networks.vnet import VNet
 import torch
 import torch.optim as optim
 from torchvision import transforms
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     def create_model(ema=False):
         # Network definition
-        net =  monai.networks.nets.UNet(dimensions=3, in_channels=1, out_channels=1, channels=(16, 32, 64, 128), strides=(2, 2, 2),  num_res_units=2, norm=('batch'))
+        net = VNet(n_channels=1, n_classes=num_classes, normalization='batchnorm', has_dropout=True)
         model = net.cuda()
         if ema:
             for param in model.parameters():
