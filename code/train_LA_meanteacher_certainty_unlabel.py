@@ -8,7 +8,6 @@ import logging
 import time
 import random
 import numpy as np
-import monai
 from networks.vnet import VNet
 import torch
 import torch.optim as optim
