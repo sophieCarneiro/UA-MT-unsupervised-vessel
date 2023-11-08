@@ -44,11 +44,12 @@ def covert_h5():
         image = nib.load(image_file)
         image = image.get_fdata()
 
-        label = nib.load(label_file)
-        label = label.get_fdata()
-
         mask = nib.load(mask_file)
         mask = mask.get_fdata()
+
+        label = nib.load(label_file)
+        label = label.get_fdata()
+        label = label * mask
 
         image = (image - np.mean(image)) / np.std(image)
         image = image.astype(np.float32)
