@@ -12,6 +12,7 @@ def test_all_case(net, image_list, num_classes, patch_size=(112, 112, 80), strid
     total_metric = 0.0
     for image_path in tqdm(image_list):
         id = image_path.split('/')[-1]
+        print("mpm", image_path)
         h5f = h5py.File(image_path, 'r')
         image = h5f['image'][:]
         label = h5f['label'][:]
