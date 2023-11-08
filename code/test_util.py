@@ -15,6 +15,8 @@ def test_all_case(net, image_list, num_classes, patch_size=(112, 112, 80), strid
         h5f = h5py.File(image_path, 'r')
         image = h5f['image'][:]
         label = h5f['label'][:]
+        if id.split("_")[0] == "ircad":
+            mask = h5f['mask'][:]
         if preproc_fn is not None:
             image = preproc_fn(image)
         prediction, score_map = test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=num_classes)
@@ -29,6 +31,8 @@ def test_all_case(net, image_list, num_classes, patch_size=(112, 112, 80), strid
             nib.save(nib.Nifti1Image(prediction.astype(np.float32), np.eye(4)), test_save_path + id + "_pred.nii.gz")
             nib.save(nib.Nifti1Image(image[:].astype(np.float32), np.eye(4)), test_save_path + id + "_img.nii.gz")
             nib.save(nib.Nifti1Image(label[:].astype(np.float32), np.eye(4)), test_save_path + id + "_gt.nii.gz")
+            if id.split("_")[0] == "ircad":
+                nib.save(nib.Nifti1Image(mask[:].astype(np.float32), np.eye(4)), test_save_path + id + "_mask.nii.gz")
     avg_metric = total_metric / len(image_list)
     print('average metric is {}'.format(avg_metric))
 
