@@ -2,7 +2,7 @@ import h5py
 import math
 import nibabel as nib
 import numpy as np
-from medpy import metric
+# from medpy import metric
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
@@ -19,11 +19,11 @@ def test_all_case(net, image_list, num_classes, patch_size=(112, 112, 80), strid
             image = preproc_fn(image)
         prediction, score_map = test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=num_classes)
 
-        if np.sum(prediction)==0:
-            single_metric = (0,0,0,0)
-        else:
-            single_metric = calculate_metric_percase(prediction, label[:])
-        total_metric += np.asarray(single_metric)
+        # if np.sum(prediction)==0:
+        #     single_metric = (0,0,0,0)
+        # else:
+        #     single_metric = calculate_metric_percase(prediction, label[:])
+        # total_metric += np.asarray(single_metric)
 
         if save_result:
             nib.save(nib.Nifti1Image(prediction.astype(np.float32), np.eye(4)), test_save_path + id + "_pred.nii.gz")
@@ -107,10 +107,10 @@ def cal_dice(prediction, label, num=2):
     return total_dice
 
 
-def calculate_metric_percase(pred, gt):
-    dice = metric.binary.dc(pred, gt)
-    jc = metric.binary.jc(pred, gt)
-    hd = metric.binary.hd95(pred, gt)
-    asd = metric.binary.asd(pred, gt)
-
-    return dice, jc, hd, asd
+# # def calculate_metric_percase(pred, gt):
+# #     dice = metric.binary.dc(pred, gt)
+# #     jc = metric.binary.jc(pred, gt)
+# #     hd = metric.binary.hd95(pred, gt)
+# #     asd = metric.binary.asd(pred, gt)
+#
+#     return dice, jc, hd, asd
