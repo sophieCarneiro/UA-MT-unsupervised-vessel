@@ -38,7 +38,8 @@ def covert_h5():
     #
     for i in tqdm(range(1, 21)):
         image_file = f"../../data_ircad/ircad/3Dircadb1.{i}/maskedLiverIso.nii"
-        label_file = f"../../data_ircad/ircad/3Dircadb1.{i}/maskedLiverIso.nii"
+        label_file = f"../../data_ircad/ircad/3Dircadb1.{i}/vesselsIso.nii"
+        mask_file = f"../../data_ircad/ircad/3Dircadb1.{i}/liverMaskIso.nii"
 
         image = nib.load(image_file)
         image = image.get_fdata()
@@ -46,12 +47,16 @@ def covert_h5():
         label = nib.load(label_file)
         label = label.get_fdata()
 
+        mask = nib.load(mask_file)
+        mask = mask.get_fdata()
+
         image = (image - np.mean(image)) / np.std(image)
         image = image.astype(np.float32)
         os.makedirs(f"../../data_ircad/synthetics_h5/ircad_{i}")
         f = h5py.File(f"../../data_ircad/synthetics_h5/ircad_{i}/mri_norm2.h5", 'w')
         f.create_dataset('image', data=image, compression="gzip")
         f.create_dataset('label', data=label, compression="gzip")
+        f.create_dataset('mask', data=mask, compression="gzip")
         with open('../../data_ircad/synthetics_h5/train.list', 'a') as text:
             text.write(f"ircad_{i}\n")
 
