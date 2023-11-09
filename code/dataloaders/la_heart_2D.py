@@ -83,7 +83,7 @@ class RandomCrop(object):
             image = np.pad(image, [(pw, pw), (ph, ph)], mode='constant', constant_values=0)
             label = np.pad(label, [(pw, pw), (ph, ph)], mode='constant', constant_values=0)
 
-        (w, h, d) = image.shape
+        (w, h) = image.shape
         # if np.random.uniform() > 0.33:
         #     w1 = np.random.randint((w - self.output_size[0])//4, 3*(w - self.output_size[0])//4)
         #     h1 = np.random.randint((h - self.output_size[1])//4, 3*(h - self.output_size[1])//4)
