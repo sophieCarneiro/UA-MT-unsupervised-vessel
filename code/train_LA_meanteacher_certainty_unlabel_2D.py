@@ -170,8 +170,8 @@ if __name__ == "__main__":
             ## calculate the loss
             loss_seg = F.cross_entropy(outputs[:labeled_bs], label_batch[:labeled_bs])
             outputs_soft = F.softmax(outputs, dim=1)
-            print(outputs_soft[:labeled_bs, 1, :, :].shape, label_batch[:labeled_bs].shape)
-            loss_seg_dice = losses.dice_loss(outputs_soft[:labeled_bs, 1, :, :], label_batch[:labeled_bs] == 1)
+            print(outputs_soft[:labeled_bs, 0, :, :].shape, label_batch[:labeled_bs].shape)
+            loss_seg_dice = losses.dice_loss(outputs_soft[:labeled_bs, 0, :, :], label_batch[:labeled_bs] == 1)
             supervised_loss = 0.5*(loss_seg+loss_seg_dice)
 
             consistency_weight = get_current_consistency_weight(iter_num//150)
