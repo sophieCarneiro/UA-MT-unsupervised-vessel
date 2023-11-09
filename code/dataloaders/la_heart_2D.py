@@ -29,7 +29,7 @@ class LAHeart2D(Dataset):
 
     def __getitem__(self, idx):
         image_name = self.image_list[idx]
-        h5f = h5py.File(self._base_dir+"/"+image_name+"/mri_norm2.h5", 'r')
+        h5f = h5py.File(self._base_dir + image_name+"/mri_norm2.h5", 'r')
         image = h5f['image'][:]
         label = h5f['label'][:]
         sample = {'image': image, 'label': label}
