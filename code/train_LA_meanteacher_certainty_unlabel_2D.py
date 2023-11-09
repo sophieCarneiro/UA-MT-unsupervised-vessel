@@ -154,7 +154,7 @@ if __name__ == "__main__":
             with torch.no_grad():
                 ema_output = ema_model(ema_inputs)
             T = 8
-            volume_batch_r = unlabeled_volume_batch.repeat(2, 1, 1, 1, 1)
+            volume_batch_r = unlabeled_volume_batch.repeat(2, 1, 1, 1)
             stride = volume_batch_r.shape[0] // 2
             preds = torch.zeros([stride * T, 2, 96, 96]).cuda()
             for i in range(T//2):
