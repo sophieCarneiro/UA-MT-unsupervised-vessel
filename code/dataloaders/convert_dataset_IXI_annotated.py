@@ -142,7 +142,7 @@ def covert_h5():
         f.create_dataset('image', data=image, compression="gzip")
         f.create_dataset('label', data=label, compression="gzip")
         with open('../../data_stare_drive/train.list', 'a') as text:
-            text.write(f"STARE_{i}{i}\n")
+            text.write(f"STARE_{i}\n")
         f.close()
         i += 1
 

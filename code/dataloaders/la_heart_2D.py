@@ -77,8 +77,7 @@ class RandomCrop(object):
         image, label = sample['image'], sample['label']
 
         # pad the sample if necessary
-        if label.shape[0] <= self.output_size[0] or label.shape[1] <= self.output_size[1] or label.shape[2] <= \
-                self.output_size[2]:
+        if label.shape[0] <= self.output_size[0] or label.shape[1] <= self.output_size[1]:
             pw = max((self.output_size[0] - label.shape[0]) // 2 + 3, 0)
             ph = max((self.output_size[1] - label.shape[1]) // 2 + 3, 0)
             image = np.pad(image, [(pw, pw), (ph, ph)], mode='constant', constant_values=0)
