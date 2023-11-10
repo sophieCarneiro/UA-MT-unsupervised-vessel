@@ -13,7 +13,7 @@ class ConvBlock(nn.Module):
             else:
                 input_channel = n_filters_out
 
-            ops.append(nn.Con2d(input_channel, n_filters_out, 3, padding=1))
+            ops.append(nn.Conv2d(input_channel, n_filters_out, 3, padding=1))
             if normalization == 'batchnorm':
                 ops.append(nn.BatchNorm2d(n_filters_out))
             elif normalization == 'groupnorm':
