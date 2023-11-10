@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
-
+from dataloaders import image_utils
 
 def test_all_case(net, image_list, num_classes, patch_size=(112, 112, 80), stride_xy=18, stride_z=4, save_result=True, test_save_path=None, preproc_fn=None):
     total_metric = 0.0
@@ -111,10 +111,85 @@ def cal_dice(prediction, label, num=2):
     return total_dice
 
 
-# # def calculate_metric_percase(pred, gt):
-# #     dice = metric.binary.dc(pred, gt)
-# #     jc = metric.binary.jc(pred, gt)
-# #     hd = metric.binary.hd95(pred, gt)
-# #     asd = metric.binary.asd(pred, gt)
-#
-#     return dice, jc, hd, asd
+
+
+def test_all_case_2D(net, image_list, num_classes, patch_size=(112, 112), stride_xy=18, save_result=True, test_save_path=None):
+    total_metric = 0.0
+    for image_path in tqdm(image_list):
+        id = image_path.split('/')[-2]
+        h5f = h5py.File(image_path, 'r')
+        image = h5f['image'][:]
+        label = h5f['label'][:]
+        if id.split("_")[0] == "DRIVE":
+            mask = h5f['mask'][:]
+
+        prediction, score_map = test_single_case_2D(net, image, stride_xy, patch_size, num_classes=num_classes)
+
+        if save_result:
+            prediction = ((prediction >= 0.5) * 255).astype(np.uint8)
+            output_path_reco = test_save_path + id + "_pred.png"
+            image_utils.save_image(prediction, output_path_reco)
+
+            label = ((label >= 0.5) * 255).astype(np.uint8)
+            output_path_reco = test_save_path + id + "_gt.png"
+            image_utils.save_image(label, output_path_reco)
+
+
+            image = (image_utils.normalize_image(image) * 255).astype(np.uint8)
+            output_path_reco = test_save_path + id + "_im.png"
+            image_utils.save_image(label, output_path_reco)
+
+    avg_metric = total_metric / len(image_list)
+    print('average metric is {}'.format(avg_metric))
+
+    return avg_metric
+
+
+def test_single_case_2D(net, image, stride_xy, patch_size, num_classes=1):
+    w, h, d = image.shape
+
+    # if the size of image is less than patch_size, then padding it
+    add_pad = False
+    if w < patch_size[0]:
+        w_pad = patch_size[0]-w
+        add_pad = True
+    else:
+        w_pad = 0
+    if h < patch_size[1]:
+        h_pad = patch_size[1]-h
+        add_pad = True
+    else:
+        h_pad = 0
+
+    wl_pad, wr_pad = w_pad//2,w_pad-w_pad//2
+    hl_pad, hr_pad = h_pad//2,h_pad-h_pad//2
+    if add_pad:
+        image = np.pad(image, [(wl_pad,wr_pad),(hl_pad,hr_pad)], mode='constant', constant_values=0)
+    ww,hh = image.shape
+
+    sx = math.ceil((ww - patch_size[0]) / stride_xy) + 1
+    sy = math.ceil((hh - patch_size[1]) / stride_xy) + 1
+    print("{}, {}".format(sx, sy))
+    score_map = np.zeros((num_classes, ) + image.shape).astype(np.float32)
+    cnt = np.zeros(image.shape).astype(np.float32)
+
+    for x in range(0, sx):
+        xs = min(stride_xy*x, ww-patch_size[0])
+        for y in range(0, sy):
+            ys = min(stride_xy * y,hh-patch_size[1])
+
+            test_patch = image[xs:xs+patch_size[0], ys:ys+patch_size[1]]
+            test_patch = np.expand_dims(np.expand_dims(test_patch,axis=0),axis=0).astype(np.float32)
+            test_patch = torch.from_numpy(test_patch).cuda()
+            y1 = net(test_patch)
+            y = F.softmax(y1, dim=1)
+            y = y.cpu().data.numpy()
+            y = y[0,:,:,:]
+            score_map[:, xs:xs+patch_size[0], ys:ys+patch_size[1]] = score_map[:, xs:xs+patch_size[0], ys:ys+patch_size[1]] + y
+            cnt[xs:xs+patch_size[0], ys:ys+patch_size[1]] = cnt[xs:xs+patch_size[0], ys:ys+patch_size[1]] + 1
+    score_map = score_map/np.expand_dims(cnt,axis=0)
+    label_map = np.argmax(score_map, axis = 0)
+    if add_pad:
+        label_map = label_map[wl_pad:wl_pad+w,hl_pad:hl_pad+h]
+        score_map = score_map[:,wl_pad:wl_pad+w,hl_pad:hl_pad+h]
+    return label_map, score_map

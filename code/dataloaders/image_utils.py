@@ -58,3 +58,17 @@ def normalize_image(image):
     mini = np.amin(image)
     image_norm = (image.astype(np.float64) - mini) / (maxi - mini)
     return image_norm
+
+
+def show_image(im, title="", colormap="gray", save="", dpi=100):
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+
+    plt.imshow(im, colormap)
+    plt.title(title)
+    plt.tight_layout()
+    # plt.show(block =False)
+
+    if save != "":
+        plt.savefig(save, dpi=dpi)
+    return
