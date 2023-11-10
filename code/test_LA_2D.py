@@ -1,7 +1,7 @@
 import os
 import argparse
 import torch
-from networks.vnet import VNet
+from networks.vnet_2D import VNet
 from test_util import test_all_case_2D
 
 parser = argparse.ArgumentParser()
