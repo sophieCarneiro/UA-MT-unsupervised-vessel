@@ -6,7 +6,7 @@ import h5py
 import nibabel as nib
 import image_utils
 from skimage.color import rgb2grey
-
+import matplotlib.pyplot as plt
 
 def covert_h5():
 
@@ -76,6 +76,7 @@ def covert_h5():
     #
     #     image = image_utils.read_image(image_file)
     #     label = image_utils.read_image(label_file)
+    #     label= image_utils.normalize_image(label)
     #
     #     image = (image - np.mean(image)) / np.std(image)
     #     image = image.astype(np.float32)
@@ -91,33 +92,34 @@ def covert_h5():
 
 
     # ######################################### DRIVE ########################################################
-    # image_file = sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/training/images/*")) +  sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/test/images/*"))
-    # label_file = sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/training/1st_manual/*")) + sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/test/1st_manual/*"))
-    #
-    # for i, j in zip(image_file, label_file):
-    #     print(i)
-    #     print(j)
-    #     print()
-    #
-    # i = 0
-    # for image_file, label_file in tqdm(zip(image_file, label_file)):
-    #     image = image_utils.read_image(image_file)
-    #     image = image_utils.normalize_image(rgb2grey(image))
-    #     label = image_utils.read_image(label_file)
-    #     if len(label.shape) == 3:
-    #         label = label[:,:,0]
-    #
-    #     image = (image - np.mean(image)) / np.std(image)
-    #     image = image.astype(np.float32)
-    #
-    #     os.makedirs(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}")
-    #     f = h5py.File(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}/mri_norm2.h5", 'w')
-    #     f.create_dataset('image', data=image, compression="gzip")
-    #     f.create_dataset('label', data=label, compression="gzip")
-    #     with open('../../data_synthetics_DRIVE/test.list', 'a') as text:
-    #         text.write(f"DRIVE_{i}\n")
-    #     f.close()
-    #     i += 1
+    image_file = sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/training/images/*")) +  sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/test/images/*"))
+    label_file = sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/training/1st_manual/*")) + sorted(glob(f"../../data_synthetics_DRIVE/DRIVE/test/1st_manual/*"))
+
+    for i, j in zip(image_file, label_file):
+        print(i)
+        print(j)
+        print()
+
+    i = 0
+    for image_file, label_file in tqdm(zip(image_file, label_file)):
+        image = image_utils.read_image(image_file)
+        image = image_utils.normalize_image(rgb2grey(image))
+        label = image_utils.read_image(label_file)
+
+        if len(label.shape) == 3:
+            label = label[:,:,0]
+        label= image_utils.normalize_image(label)
+        image = (image - np.mean(image)) / np.std(image)
+        image = image.astype(np.float32)
+
+        os.makedirs(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}")
+        f = h5py.File(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}/mri_norm2.h5", 'w')
+        f.create_dataset('image', data=image, compression="gzip")
+        f.create_dataset('label', data=label, compression="gzip")
+        # with open('../../data_synthetics_DRIVE/test.list', 'a') as text:
+        #     text.write(f"DRIVE_{i}\n")
+        # f.close()
+        i += 1
     # ######################################### STARE ########################################################
     image_file = sorted(glob(f"../../data_synthetics_DRIVE/STARE/im*.tif"))
     label_file = sorted(glob(f"../../data_synthetics_DRIVE/STARE/gt*.tif"))
@@ -133,7 +135,7 @@ def covert_h5():
         label = image_utils.read_image(label_file)
         if len(label.shape) == 3:
             label = label[:,:,0]
-
+        label= image_utils.normalize_image(label)
         image = (image - np.mean(image)) / np.std(image)
         image = image.astype(np.float32)
 
@@ -141,9 +143,9 @@ def covert_h5():
         f = h5py.File(f"../../data_stare_drive/datas_synth/STARE_{i}/mri_norm2.h5", 'w')
         f.create_dataset('image', data=image, compression="gzip")
         f.create_dataset('label', data=label, compression="gzip")
-        with open('../../data_stare_drive/train.list', 'a') as text:
-            text.write(f"STARE_{i}\n")
-        f.close()
+        # with open('../../data_stare_drive/train.list', 'a') as text:
+        #     text.write(f"STARE_{i}\n")
+        # f.close()
         i += 1
 
 if __name__ == '__main__':
