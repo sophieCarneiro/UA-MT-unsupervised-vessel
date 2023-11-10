@@ -146,7 +146,7 @@ def test_all_case_2D(net, image_list, num_classes, patch_size=(112, 112), stride
 
 
 def test_single_case_2D(net, image, stride_xy, patch_size, num_classes=1):
-    w, h, d = image.shape
+    w, h = image.shape
 
     # if the size of image is less than patch_size, then padding it
     add_pad = False
