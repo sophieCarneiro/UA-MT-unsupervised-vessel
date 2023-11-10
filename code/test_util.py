@@ -125,11 +125,11 @@ def test_all_case_2D(net, image_list, num_classes, patch_size=(112, 112), stride
         prediction, score_map = test_single_case_2D(net, image, stride_xy, patch_size, num_classes=num_classes)
 
         if save_result:
-            prediction = ((prediction >= 0.5) * 255).astype(np.uint8)
+            prediction = (image_utils.normalize_image(prediction) * 255).astype(np.uint8)
             output_path_reco = test_save_path + id + "_pred.png"
             image_utils.save_image(prediction, output_path_reco)
 
-            label = ((label >= 0.5) * 255).astype(np.uint8)
+            label = (image_utils.normalize_image(label) * 255).astype(np.uint8)
             output_path_reco = test_save_path + id + "_gt.png"
             image_utils.save_image(label, output_path_reco)
 
