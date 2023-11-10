@@ -133,10 +133,9 @@ def test_all_case_2D(net, image_list, num_classes, patch_size=(112, 112), stride
             output_path_reco = test_save_path + id + "_gt.png"
             image_utils.save_image(label, output_path_reco)
 
-
             image = (image_utils.normalize_image(image) * 255).astype(np.uint8)
             output_path_reco = test_save_path + id + "_im.png"
-            image_utils.save_image(label, output_path_reco)
+            image_utils.save_image(image, output_path_reco)
 
     avg_metric = total_metric / len(image_list)
     print('average metric is {}'.format(avg_metric))
