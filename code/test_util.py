@@ -120,8 +120,7 @@ def test_all_case_2D(net, image_list, num_classes, patch_size=(112, 112), stride
         h5f = h5py.File(image_path, 'r')
         image = h5f['image'][:]
         label = h5f['label'][:]
-        if id.split("_")[0] == "DRIVE":
-            mask = h5f['mask'][:]
+
 
         prediction, score_map = test_single_case_2D(net, image, stride_xy, patch_size, num_classes=num_classes)
 
