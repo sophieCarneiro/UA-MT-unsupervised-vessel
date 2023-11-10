@@ -68,27 +68,31 @@ def covert_h5():
 
 
     ################################# donnees 2D Synthetiques ##############################################
-    # image_file = sorted(glob(f"../../data_synthetics_DRIVE/simulations/*"))
-    # label_file = sorted(glob(f"../../data_synthetics_DRIVE/cco_modifie/*"))
-    #
-    # i = 0
-    # for image_file, label_file in tqdm(zip(image_file, label_file)):
-    #
-    #     image = image_utils.read_image(image_file)
-    #     label = image_utils.read_image(label_file)
-    #     label= image_utils.normalize_image(label)
-    #
-    #     image = (image - np.mean(image)) / np.std(image)
-    #     image = image.astype(np.float32)
-    #
-    #     os.makedirs(f"../../data_synthetics_DRIVE/datas_synth/synth_{i}")
-    #     f = h5py.File(f"../../data_synthetics_DRIVE/datas_synth/synth_{i}/mri_norm2.h5", 'w')
-    #     f.create_dataset('image', data=image, compression="gzip")
-    #     f.create_dataset('label', data=label, compression="gzip")
-    #     with open('../../data_synthetics_DRIVE/train.list', 'a') as text:
-    #         text.write(f"synth_{i}\n")
-    #     f.close()
-    #     i += 1
+    image_file = sorted(glob(f"../../data_synthetics_DRIVE/simulations/*"))
+    label_file = sorted(glob(f"../../data_synthetics_DRIVE/cco_modifie/*"))
+
+    i = 0
+    for image_file, label_file in tqdm(zip(image_file, label_file)):
+
+        image = image_utils.read_image(image_file)
+        label = image_utils.read_image(label_file)
+        label= image_utils.normalize_image(label)
+
+        image = (image - np.mean(image)) / np.std(image)
+        image = image.astype(np.float32)
+        image_utils.show_image(image)
+        image_utils.show_image(label)
+
+        plt.show()
+        break
+        os.makedirs(f"../../data_synthetics_DRIVE/datas_synth/synth_{i}")
+        f = h5py.File(f"../../data_synthetics_DRIVE/datas_synth/synth_{i}/mri_norm2.h5", 'w')
+        f.create_dataset('image', data=image, compression="gzip")
+        f.create_dataset('label', data=label, compression="gzip")
+        with open('../../data_synthetics_DRIVE/train.list', 'a') as text:
+            text.write(f"synth_{i}\n")
+        f.close()
+        i += 1
 
 
     # ######################################### DRIVE ########################################################
@@ -108,17 +112,21 @@ def covert_h5():
 
         if len(label.shape) == 3:
             label = label[:,:,0]
-        label= image_utils.normalize_image(label)
+        label = image_utils.normalize_image(label)
         image = (image - np.mean(image)) / np.std(image)
         image = image.astype(np.float32)
+        image_utils.show_image(image)
+        image_utils.show_image(label)
 
-        os.makedirs(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}")
-        f = h5py.File(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}/mri_norm2.h5", 'w')
-        f.create_dataset('image', data=image, compression="gzip")
-        f.create_dataset('label', data=label, compression="gzip")
-        # with open('../../data_synthetics_DRIVE/test.list', 'a') as text:
-        #     text.write(f"DRIVE_{i}\n")
-        # f.close()
+        plt.show()
+        # os.makedirs(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}")
+        # f = h5py.File(f"../../data_synthetics_DRIVE/datas_synth/DRIVE_{i}/mri_norm2.h5", 'w')
+        # f.create_dataset('image', data=image, compression="gzip")
+        # f.create_dataset('label', data=label, compression="gzip")
+        # # with open('../../data_synthetics_DRIVE/test.list', 'a') as text:
+        # #     text.write(f"DRIVE_{i}\n")
+        # # f.close()
+        break
         i += 1
     # ######################################### STARE ########################################################
     image_file = sorted(glob(f"../../data_synthetics_DRIVE/STARE/im*.tif"))
@@ -138,7 +146,11 @@ def covert_h5():
         label= image_utils.normalize_image(label)
         image = (image - np.mean(image)) / np.std(image)
         image = image.astype(np.float32)
+        image_utils.show_image(image)
+        image_utils.show_image(label)
 
+        plt.show()
+        break
         os.makedirs(f"../../data_stare_drive/datas_synth/STARE_{i}")
         f = h5py.File(f"../../data_stare_drive/datas_synth/STARE_{i}/mri_norm2.h5", 'w')
         f.create_dataset('image', data=image, compression="gzip")
