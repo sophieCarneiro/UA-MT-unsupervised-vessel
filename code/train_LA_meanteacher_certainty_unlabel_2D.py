@@ -8,7 +8,7 @@ import logging
 import time
 import random
 import numpy as np
-from networks.vnet import VNet
+from networks.vnet_2D import VNet
 from networks.u_net import UNet
 import torch
 import torch.optim as optim
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     def create_model(ema=False):
         # Network definition
-        net = UNet()
+        net = VNet(n_channels=1, n_classes=num_classes, normalization='batchnorm', has_dropout=True)
         model = net.cuda()
         if ema:
             for param in model.parameters():
