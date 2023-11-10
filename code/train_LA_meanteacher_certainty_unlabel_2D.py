@@ -148,23 +148,23 @@ if __name__ == "__main__":
             volume_batch, label_batch = volume_batch.cuda(), label_batch.cuda()
             unlabeled_volume_batch = volume_batch[labeled_bs:]
 
-            noise = torch.clamp(torch.randn_like(unlabeled_volume_batch) * 0.1, -0.2, 0.2)
-            ema_inputs = unlabeled_volume_batch + noise
+            # noise = torch.clamp(torch.randn_like(unlabeled_volume_batch) * 0.1, -0.2, 0.2)
+            # ema_inputs = unlabeled_volume_batch + noise
             outputs = model(volume_batch)
-            with torch.no_grad():
-                ema_output = ema_model(ema_inputs)
-            T = 8
-            volume_batch_r = unlabeled_volume_batch.repeat(2, 1, 1, 1)
-            stride = volume_batch_r.shape[0] // 2
-            preds = torch.zeros([stride * T, 2, 96, 96]).cuda()
-            for i in range(T//2):
-                ema_inputs = volume_batch_r + torch.clamp(torch.randn_like(volume_batch_r) * 0.1, -0.2, 0.2)
-                with torch.no_grad():
-                    preds[2 * stride * i:2 * stride * (i + 1)] = ema_model(ema_inputs)
-            preds = F.softmax(preds, dim=1)
-            preds = preds.reshape(T, stride, 2, 96, 96)
-            preds = torch.mean(preds, dim=0)  #(batch, 2, 112,112,80)
-            uncertainty = -1.0*torch.sum(preds*torch.log(preds + 1e-6), dim=1, keepdim=True) #(batch, 1, 112,112,80)
+            # with torch.no_grad():
+            #     ema_output = ema_model(ema_inputs)
+            # T = 8
+            # volume_batch_r = unlabeled_volume_batch.repeat(2, 1, 1, 1)
+            # stride = volume_batch_r.shape[0] // 2
+            # preds = torch.zeros([stride * T, 2, 96, 96]).cuda()
+            # for i in range(T//2):
+            #     ema_inputs = volume_batch_r + torch.clamp(torch.randn_like(volume_batch_r) * 0.1, -0.2, 0.2)
+            #     with torch.no_grad():
+            #         preds[2 * stride * i:2 * stride * (i + 1)] = ema_model(ema_inputs)
+            # preds = F.softmax(preds, dim=1)
+            # preds = preds.reshape(T, stride, 2, 96, 96)
+            # preds = torch.mean(preds, dim=0)  #(batch, 2, 112,112,80)
+            # uncertainty = -1.0*torch.sum(preds*torch.log(preds + 1e-6), dim=1, keepdim=True) #(batch, 1, 112,112,80)
 
 
             ## calculate the loss
@@ -174,35 +174,36 @@ if __name__ == "__main__":
             loss_seg_dice = losses.dice_loss(outputs_soft[:labeled_bs, 0, :, :], label_batch[:labeled_bs] == 1)
             supervised_loss = 0.5*(loss_seg+loss_seg_dice)
 
-            consistency_weight = get_current_consistency_weight(iter_num//150)
-            consistency_dist = consistency_criterion(outputs[labeled_bs:], ema_output) #(batch, 2, 112,112,80)
-            threshold = (0.75+0.25*ramps.sigmoid_rampup(iter_num, max_iterations))*np.log(2)
-            mask = (uncertainty<threshold).float()
-            consistency_dist = torch.sum(mask*consistency_dist)/(2*torch.sum(mask)+1e-16)
-            consistency_loss = consistency_weight * consistency_dist
-            loss = supervised_loss + consistency_loss
+            # consistency_weight = get_current_consistency_weight(iter_num//150)
+            # consistency_dist = consistency_criterion(outputs[labeled_bs:], ema_output) #(batch, 2, 112,112,80)
+            # threshold = (0.75+0.25*ramps.sigmoid_rampup(iter_num, max_iterations))*np.log(2)
+            # mask = (uncertainty<threshold).float()
+            # consistency_dist = torch.sum(mask*consistency_dist)/(2*torch.sum(mask)+1e-16)
+            # consistency_loss = consistency_weight * consistency_dist
+            # loss = supervised_loss + consistency_loss
+            loss = supervised_loss
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            update_ema_variables(model, ema_model, args.ema_decay, iter_num)
+            # update_ema_variables(model, ema_model, args.ema_decay, iter_num)
 
             iter_num = iter_num + 1
-            writer.add_scalar('uncertainty/mean', uncertainty[0,0].mean(), iter_num)
-            writer.add_scalar('uncertainty/max', uncertainty[0,0].max(), iter_num)
-            writer.add_scalar('uncertainty/min', uncertainty[0,0].min(), iter_num)
-            writer.add_scalar('uncertainty/mask_per', torch.sum(mask)/mask.numel(), iter_num)
-            writer.add_scalar('uncertainty/threshold', threshold, iter_num)
-            writer.add_scalar('lr', lr_, iter_num)
-            writer.add_scalar('loss/loss', loss, iter_num)
-            writer.add_scalar('loss/loss_seg', loss_seg, iter_num)
-            writer.add_scalar('loss/loss_seg_dice', loss_seg_dice, iter_num)
-            writer.add_scalar('train/consistency_loss', consistency_loss, iter_num)
-            writer.add_scalar('train/consistency_weight', consistency_weight, iter_num)
-            writer.add_scalar('train/consistency_dist', consistency_dist, iter_num)
-
-            logging.info('iteration %d : loss : %f cons_dist: %f, loss_weight: %f' %
-                         (iter_num, loss.item(), consistency_dist.item(), consistency_weight))
+            # writer.add_scalar('uncertainty/mean', uncertainty[0,0].mean(), iter_num)
+            # writer.add_scalar('uncertainty/max', uncertainty[0,0].max(), iter_num)
+            # writer.add_scalar('uncertainty/min', uncertainty[0,0].min(), iter_num)
+            # writer.add_scalar('uncertainty/mask_per', torch.sum(mask)/mask.numel(), iter_num)
+            # writer.add_scalar('uncertainty/threshold', threshold, iter_num)
+            # writer.add_scalar('lr', lr_, iter_num)
+            # writer.add_scalar('loss/loss', loss, iter_num)
+            # writer.add_scalar('loss/loss_seg', loss_seg, iter_num)
+            # writer.add_scalar('loss/loss_seg_dice', loss_seg_dice, iter_num)
+            # writer.add_scalar('train/consistency_loss', consistency_loss, iter_num)
+            # writer.add_scalar('train/consistency_weight', consistency_weight, iter_num)
+            # writer.add_scalar('train/consistency_dist', consistency_dist, iter_num)
+            #
+            # logging.info('iteration %d : loss : %f cons_dist: %f, loss_weight: %f' %
+            #              (iter_num, loss.item(), consistency_dist.item(), consistency_weight))
 
             ## change lr
             if iter_num % 2500 == 0:
