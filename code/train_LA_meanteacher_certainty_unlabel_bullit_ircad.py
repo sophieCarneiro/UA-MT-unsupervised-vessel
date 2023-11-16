@@ -111,8 +111,8 @@ if __name__ == "__main__":
                            ToTensor()
                        ]))
 
-    labeled_idxs = list(range(33))
-    unlabeled_idxs = list(range(33, 53))
+    labeled_idxs = list(range(303))
+    unlabeled_idxs = list(range(303, 323))
 
 
     batch_sampler = TwoStreamBatchSampler(labeled_idxs, unlabeled_idxs, batch_size, batch_size-labeled_bs)
