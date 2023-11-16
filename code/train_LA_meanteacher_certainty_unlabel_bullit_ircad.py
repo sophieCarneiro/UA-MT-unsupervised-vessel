@@ -144,6 +144,8 @@ if __name__ == "__main__":
             time2 = time.time()
             # print('fetch data cost {}'.format(time2-time1))
             volume_batch, label_batch = sampled_batch['image'], sampled_batch['label']
+            print(volume_batch.shape, label_batch.shape)
+          
             volume_batch, label_batch = volume_batch.cuda(), label_batch.cuda()
             unlabeled_volume_batch = volume_batch[labeled_bs:]
 
@@ -253,6 +255,7 @@ if __name__ == "__main__":
             if iter_num >= max_iterations:
                 break
             time1 = time.time()
+       
         if iter_num >= max_iterations:
             break
     save_mode_path = os.path.join(snapshot_path, 'iter_'+str(max_iterations)+'.pth')

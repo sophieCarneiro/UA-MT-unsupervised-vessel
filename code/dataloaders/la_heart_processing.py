@@ -12,6 +12,7 @@ def covert_h5():
         label = (label == 255).astype(np.uint8)
 
         image = (image - np.mean(image)) / np.std(image)
+        print(image.shape)
 
         print(label.shape)
         f = h5py.File(item.replace('lgemri.nrrd', 'mri_norm2.h5'), 'w')

@@ -112,7 +112,7 @@ if __name__ == "__main__":
                        ]))
 
     labeled_idxs = list(range(291))
-    unlabeled_idxs = list(range(291, 311))
+    unlabeled_idxs = list(range(291,311))
 
 
     batch_sampler = TwoStreamBatchSampler(labeled_idxs, unlabeled_idxs, batch_size, batch_size-labeled_bs)
@@ -170,7 +170,7 @@ if __name__ == "__main__":
             loss_seg = F.cross_entropy(outputs[:labeled_bs], label_batch[:labeled_bs])
             outputs_soft = F.softmax(outputs, dim=1)
             print(outputs_soft[:labeled_bs, :, :, :].shape, label_batch[:labeled_bs].shape)
-            loss_seg_dice = losses.dice_loss(outputs_soft[:labeled_bs, 0, :, :, :], label_batch[:labeled_bs] == 1)
+            loss_seg_dice = losses.dice_loss(outputs_soft[:labeled_bs, 1, :, :, :], label_batch[:labeled_bs] == 1)
             supervised_loss = 0.5*(loss_seg+loss_seg_dice)
 
             consistency_weight = get_current_consistency_weight(iter_num//150)
@@ -202,44 +202,7 @@ if __name__ == "__main__":
 
             logging.info('iteration %d : loss : %f cons_dist: %f, loss_weight: %f' %
                          (iter_num, loss.item(), consistency_dist.item(), consistency_weight))
-            if iter_num % 50 == 0:
-                image = volume_batch[0, 0:1, :, :, 20:61:10].permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
-                grid_image = make_grid(image, 5, normalize=True)
-                writer.add_image('train/Image', grid_image, iter_num)
-
-                # image = outputs_soft[0, 3:4, :, :, 20:61:10].permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
-                image = torch.max(outputs_soft[0, :, :, :, 20:61:10], 0)[1].permute(2, 0, 1).data.cpu().numpy()
-                image = utils.decode_seg_map_sequence(image)
-                grid_image = make_grid(image, 5, normalize=False)
-                writer.add_image('train/Predicted_label', grid_image, iter_num)
-
-                image = label_batch[0, :, :, 20:61:10].permute(2, 0, 1)
-                grid_image = make_grid(utils.decode_seg_map_sequence(image.data.cpu().numpy()), 5, normalize=False)
-                writer.add_image('train/Groundtruth_label', grid_image, iter_num)
-
-                image = uncertainty[0, 0:1, :, :, 20:61:10].permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
-                grid_image = make_grid(image, 5, normalize=True)
-                writer.add_image('train/uncertainty', grid_image, iter_num)
-
-                mask2 = (uncertainty > threshold).float()
-                image = mask2[0, 0:1, :, :, 20:61:10].permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
-                grid_image = make_grid(image, 5, normalize=True)
-                writer.add_image('train/mask', grid_image, iter_num)
-                #####
-                image = volume_batch[-1, 0:1, :, :, 20:61:10].permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
-                grid_image = make_grid(image, 5, normalize=True)
-                writer.add_image('unlabel/Image', grid_image, iter_num)
-
-                # image = outputs_soft[-1, 3:4, :, :, 20:61:10].permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
-                image = torch.max(outputs_soft[-1, :, :, :, 20:61:10], 0)[1].permute(2, 0, 1).data.cpu().numpy()
-                image = utils.decode_seg_map_sequence(image)
-                grid_image = make_grid(image, 5, normalize=False)
-                writer.add_image('unlabel/Predicted_label', grid_image, iter_num)
-
-                image = label_batch[-1, :, :, 20:61:10].permute(2, 0, 1)
-                grid_image = make_grid(utils.decode_seg_map_sequence(image.data.cpu().numpy()), 5, normalize=False)
-                writer.add_image('unlabel/Groundtruth_label', grid_image, iter_num)
-
+    
             ## change lr
             if iter_num % 2500 == 0:
                 lr_ = base_lr * 0.1 ** (iter_num // 2500)
@@ -255,7 +218,7 @@ if __name__ == "__main__":
             time1 = time.time()
         if iter_num >= max_iterations:
             break
-    save_mode_path = os.path.join(snapshot_path, 'iter_'+str(max_iterations)+'.pth')
-    torch.save(model.state_dict(), save_mode_path)
-    logging.info("save model to {}".format(save_mode_path))
-    writer.close()
+    # save_mode_path = os.path.join(snapshot_path, 'iter_'+str(max_iterations)+'.pth')
+    # torch.save(model.state_dict(), save_mode_path)
+    # logging.info("save model to {}".format(save_mode_path))
+    # writer.close()
